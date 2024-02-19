@@ -82,7 +82,6 @@ class Session:
             
             try:
                 response = self._query_api()
-                print()
                 self.messages.append(dict(response['choices'][0].message))
             except:
                 self.fail_counter += 1
@@ -97,6 +96,10 @@ class Session:
     
     def display_messages(self):
         display_messages(self.messages)
+        
+    def print_last(self):
+        print(self.messages[-1]['content'])
+
 
 
 def start_chat(system_prompt='You are a helpful assistant', model='gpt-3.5-turbo-0125'):
