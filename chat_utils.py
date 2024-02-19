@@ -3,43 +3,59 @@ import numpy as np
 
 openai.api_key = str(np.load('open_ai_key.npy'))
 
+import markdown
 from IPython.display import HTML, display, clear_output
+    
 
 def display_imessage(message, sender="user"):
-    """Display a message in a styled box resembling iMessage. Sender can be 'user' or 'system'."""
+    """Display a message in a styled box resembling iMessage, with markdown support. Sender can be 'user', 'system', or 'assistant'."""
     
-    message = message.replace("\n", "<br>")
+    # Convert markdown to HTML, extensions are optional but can enhance functionality
+    html_message = markdown.markdown(message, extensions=['extra', 'smarty'])
     
-    if sender == "user":
-        # User message styling: Blue bubble, right-aligned
-        bg_color = "#007AFF"  # iMessage blue
-        text_color = "white"
-        align = "right"
-        border_radius = "20px 20px 0px 20px"
-    elif sender == "system":
-        # System message styling: Gray bubble, center-aligned
-        message = "SYSTEM: " + message
-        bg_color = "#E5E5EA"  # Light gray
-        text_color = "black"
-        align = "center"
-        border_radius = "20px 20px 20px 20px"
-    elif sender == "assistant":
-        # System message styling: Gray bubble, left-aligned
-        bg_color = "#303030" # #  "#E5E5EA"  # Light gray
-        text_color = "white"
-        align = "left"
-        border_radius = "20px 20px 20px 0px"
+    # Define different styles for different senders
+    styles = {
+        "user": {
+            "bg_color": "#007AFF",  # iMessage blue
+            "text_color": "white",
+            "align": "flex-end",
+            "border_radius": "20px 20px 0px 20px"
+        },
+        "system": {
+            "bg_color": "#E5E5EA",  # Light gray
+            "text_color": "black",
+            "align": "center",
+            "border_radius": "20px 20px 20px 20px",
+            "prefix": "SYSTEM: "
+        },
+        "assistant": {
+            "bg_color": "#303030",  # Dark gray
+            "text_color": "white",
+            "align": "flex-start",
+            "border_radius": "20px 20px 20px 0px"
+        }
+    }
     
+    # Get the correct style based on sender
+    style = styles.get(sender, styles["user"])
+    if "prefix" in style:
+        html_message = style["prefix"] + html_message
+    
+    # Define the HTML for the message
     html = f"""
-    <div style="display: flex; justify-content: {align}; margin: 5px;">
-        <div style="max-width: 60%; min-width: 10%; background-color: {bg_color}; color: {text_color}; padding: 10px; 
-                    font-family: Arial, sans-serif; font-size: 16px; border-radius: {border_radius}; 
+    <div style="display: flex; justify-content: {style['align']}; margin: 5px;">
+        <div style="max-width: 60%; min-width: 10%; background-color: {style['bg_color']}; color: {style['text_color']}; padding: 10px;
+                    font-family: Arial, sans-serif; font-size: 16px; border-radius: {style['border_radius']};
                     word-wrap: break-word; margin-bottom: 2px;">
-            {message}
+            {html_message}
         </div>
     </div>
     """
     display(HTML(html))
+
+# Example usage:
+display_imessage("Here is some **bold text** and _italic text_.\n\n1. First item\n2. Second item", "user")
+
 
 
 def display_messages(messages):
